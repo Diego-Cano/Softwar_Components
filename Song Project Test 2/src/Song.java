@@ -25,12 +25,21 @@ public record Song(String trackName, String artistsName, String releasedYear, St
     // Implementing compareTo method for natural ordering by track name
     @Override
     public int compareTo(Song song) {
+
+        // Updated variables. Error FIXED
+
+        int parsedThis = Integer.parseInt(this.releasedYear);
+        int parseSong = Integer.parseInt(song.releasedYear);
+
         // Compare first by releasedYear
-        String yearComparison = String.valueOf(Integer.compare(this.releasedYear, song.releasedYear));
+        String yearComparison = String.valueOf(Integer.compare(parsedThis, parseSong));
+
+        // Updated variable. Error FIXED
+        int parsedyearComparison = Integer.parseInt(yearComparison);
 
         // If the years are different, return the result of the year comparison
-        if (yearComparison != 0) {
-            return yearComparison;
+        if (parsedyearComparison != 0) {
+            return parsedyearComparison;
         }
         return this.trackName.compareTo(song.trackName);
     }
@@ -60,4 +69,3 @@ public record Song(String trackName, String artistsName, String releasedYear, St
     }
 
 }
-
