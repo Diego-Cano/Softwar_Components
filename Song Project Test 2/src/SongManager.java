@@ -1,12 +1,8 @@
-import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import java.io.FileReader;
-import java.io.IOException;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
@@ -43,32 +39,64 @@ class SongManager implements SongManagerInterface {
         readSongDataFile("spotify-2023.csv");
     }
 
+private void readSongDataFile(String filename) {
+    try (CSVReader reader = new CSVReader(new FileReader(filename))) {
+        reader.readNext(); // Skip the header
 
-    // Method to read data from count-by-release-year.csv and return a map of year counts
+        for (int currentYearIndex = 0, currentSongIndex = 0; ; ) {
+            String[] line = reader.readNext();
+
+            if (line == null) {
+                break; // Break the loop when no more lines are available
+            }
+
+            String trackName = line[0].trim();
+            String artistsName = line[1].trim();
+            String releasedYear = line[2].trim();
+            String releasedMonth = line[3].trim();
+            String releasedDay = line[4].trim();
+            String totalNumberOfStreamsOnSpotify = line[5].trim();
+
+            Song song = new Song(trackName, artistsName, releasedYear, releasedMonth, releasedDay, totalNumberOfStreamsOnSpotify);
+
+
+            songs[currentYearIndex][currentSongIndex] = song;
+
+
+            currentSongIndex++;
+
+            if (currentSongIndex >= releaseYears[currentYearIndex]) {
+                currentYearIndex++;
+                currentSongIndex = 0;
+            }
+        }
+
+        Arrays.stream(songs).forEach(Arrays::sort);
+
+    } catch (CsvValidationException | IOException e) {
+        e.printStackTrace();
+    }
+}
+
     private Map<Integer, Integer> readYearCountFile(String filename) {
         Map<Integer, Integer> yearCountMap = new HashMap<>();
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            // Read the first line (header) and skip it
-            String header = reader.readLine();
+        try (CSVReader reader = new CSVReader(new FileReader(filename))) {
+            String[] header = reader.readNext();
+            reader.readNext();
 
-            // Check if the header contains expected column names
-            if (header != null && header.contains("Year") && header.contains("Count")) {
-                // Read data and populate the map
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    int year = Integer.parseInt(parts[0].trim());
-                    int count = Integer.parseInt(parts[1].trim());
+            if (header != null) {
+                //FIXED "Invalid header in the CSV file." ERROR
+                for (String[] line; (line = reader.readNext()) != null; ) {
+                    int year = Integer.parseInt(line[0].trim());
+                    int count = Integer.parseInt(line[1].trim());
                     yearCountMap.put(year, count);
                 }
             } else {
-                // Handle the case where the header is missing or not as expected
                 System.err.println("Invalid header in the CSV file.");
             }
-        } catch (IOException | NumberFormatException e) {
-            // Handle IOException or NumberFormatException
-            e.printStackTrace();
+        } catch (CsvValidationException | IOException e) {
+
         }
 
         return yearCountMap;
@@ -76,52 +104,7 @@ class SongManager implements SongManagerInterface {
 
 
 
-    // Method to read data from spotify-2023.csv and fill the songs array
-    private void readSongDataFile(String filename) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
-            // Skip the first line (header)
-            reader.readLine();
 
-            // Read data and fill the songs array
-            String line;
-            int currentYearIndex = 0;
-            int currentSongIndex = 0;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                String trackName = parts[0].trim();
-                String artistsName = parts[1].trim();
-                String releasedYear =  parts[2].trim();
-                String releasedMonth =  parts[3].trim();
-                String releasedDay =  parts[4].trim();
-                String totalNumberOfStreamsOnSpotify =  parts[1].trim();
-//                Integer.parseInt(parts[3].trim());
-//                Integer.parseInt(parts[4].trim());
-//                Integer.parseInt(parts[5].trim());
-//                parts[9].trim();
-                // Create a Song object
-                Song song = new Song(trackName, artistsName, releasedYear, releasedMonth, releasedDay, totalNumberOfStreamsOnSpotify);
-
-                // Add the song to the songs array
-                songs[currentYearIndex][currentSongIndex] = song;
-
-                // Move to the next song index
-                currentSongIndex++;
-
-                // If the current song index exceeds the count for the current year, move to the next year
-                if (currentSongIndex >= releaseYears[currentYearIndex]) {
-                    currentYearIndex++;
-                    currentSongIndex = 0;
-                }
-            }
-
-            // Sort each year's songs by track name
-            Arrays.stream(songs).forEach(Arrays::sort);
-
-        } catch (IOException e) {
-            // Handle IOException
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Returns the total number of years in the collection.
