@@ -63,12 +63,14 @@ public record Song(String trackName, String artistsName, String releasedYear, St
         return artistsName;
     }
 
-
+    public String getReleasdDate() {
+        return String.format("%s/%s/%s", releasedMonth, releasedDay, releasedYear);
+    }
     public String getReleasedYear() {
         return releasedYear;
     }
 
     public String getTotalNumberOfStreamsOnSpotify() {
-        return totalNumberOfStreamsOnSpotify;
+        return totalNumberOfStreamsOnSpotify.toString();
     }
 }
