@@ -17,7 +17,7 @@ public class BaskinRobbinsGame {
 
         // Recursive case: sum up the possibilities for the next moves
         int ways = 0;
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 2; i++) {
             ways += baskin(n - i);
         }
 
@@ -44,7 +44,7 @@ public class BaskinRobbinsGame {
         }
 
         int ways = 0;
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 2; i++) {
             ways += baskinMemo(n - i);
         }
 
