@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -11,10 +12,10 @@ public class SongViewer extends JFrame {
     private final SongManager songManager;
 
     // GUI components
-    private final JButton loadButton;
-    private final JButton prevButton;
-    private final JButton nextButton;
-    private final JComboBox<String> yearComboBox;
+    final JButton loadButton;
+    final JButton prevButton;
+    final JButton nextButton;
+    final JComboBox<String> yearComboBox;
     private final JTextField trackNameField;
     private final JTextField artistField;
     private final JTextField releasedYearField;
@@ -39,22 +40,70 @@ public class SongViewer extends JFrame {
         streamsField = new JTextField();
 
         // Set layout manager
-        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+        //setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = 1;
 
         // Add components to the frame
-        add(loadButton);
-        add(new JLabel("Release Year:"));
-        add(yearComboBox);
-        add(new JLabel("Track Name:"));
-        add(trackNameField);
-        add(new JLabel("Artist:"));
-        add(artistField);
-        add(new JLabel("Released Year:"));
-        add(releasedYearField);
-        add(new JLabel("Total Streams:"));
-        add(streamsField);
-        add(prevButton);
-        add(nextButton);
+        // add load button
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        add(loadButton, gbc);
+
+        // add previous button
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        add(prevButton, gbc);
+
+        // add next button
+        gbc.gridx = 2;
+        gbc.gridy = 0;
+        add(nextButton, gbc);
+
+        // add year combobox
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 1;
+        add(yearComboBox, gbc);
+
+        // add track name
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        add(new JLabel("Track Name:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        add(trackNameField, gbc);
+
+        // add artist
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.weightx = 1;
+        add(new JLabel("Artist(s):"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.weightx = 2;
+        add(artistField, gbc);
+
+        // add released year
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.weightx = 1;
+        add(new JLabel("Released Date:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.weightx = 2;
+        add(releasedYearField, gbc);
+
+        // add total streams
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.weightx = 1;
+        add(new JLabel("Total Streams:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 5;
+        gbc.weightx = 2;
+        add(streamsField, gbc);
 
         // Set initial state
         setInitialState();
@@ -88,6 +137,7 @@ public class SongViewer extends JFrame {
             }
         });
 
+
         // Set frame properties
         setTitle("Song Viewer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -109,7 +159,7 @@ public class SongViewer extends JFrame {
     }
 
     // Method called when the Load Data button is clicked
-    private void loadButtonClicked() {
+    public void loadButtonClicked() {
         // Load data from SongManager and populate the yearComboBox
         for (int i = 0; i < songManager.getYearCount(); i++) {
             yearComboBox.addItem(songManager.getYearName(i));
@@ -129,6 +179,7 @@ public class SongViewer extends JFrame {
 
     // Method called when the Prev button is clicked
     private void prevButtonClicked() {
+        int previousYearIndex = currentYearIndex;
         if (currentSongIndex > 0) {
             currentSongIndex--;
         } else if (currentYearIndex > 0) {
@@ -136,11 +187,17 @@ public class SongViewer extends JFrame {
             currentSongIndex = songManager.getSongCount(currentYearIndex) - 1;
         }
 
+        // Check if the release year has changed
+        if (previousYearIndex != currentYearIndex) {
+            updateHeader();  // Update the GUI header based on the selected song
+        }
+
         updateFields();
     }
 
     // Method called when the Next button is clicked
     private void nextButtonClicked() {
+        int previousYearIndex = currentYearIndex;
         if (currentSongIndex < songManager.getSongCount(currentYearIndex) - 1) {
             currentSongIndex++;
         } else if (currentYearIndex < songManager.getYearCount() - 1) {
@@ -148,7 +205,18 @@ public class SongViewer extends JFrame {
             currentSongIndex = 0;
         }
 
+        // Check if the release year has changed
+        if (previousYearIndex != currentYearIndex) {
+            updateHeader();  // Update the GUI header based on the selected song
+        }
+
+
         updateFields();
+    }
+
+    // Method to update the GUI header based on the selected song
+    private void updateHeader() {
+        setTitle("Song Viewer - " + songManager.getYearName(currentYearIndex));
     }
 
     // Method called when the yearComboBox selection changes
@@ -156,23 +224,23 @@ public class SongViewer extends JFrame {
         currentYearIndex = yearComboBox.getSelectedIndex();
         currentSongIndex = 0;
 
+
+
         updateFields();
     }
 
     // Method to update the text fields based on the current state
     private void updateFields() {
         Song currentSong = songManager.getSong(currentYearIndex, currentSongIndex);
-
         trackNameField.setText(currentSong.getTrackName());
         artistField.setText(currentSong.getArtistsName());
-        releasedYearField.setText(String.valueOf(currentSong.getReleasedYear()));
-//        streamsField.setText(currentSong.getTotalNumberOfStreamsOnSpotify());
+        releasedYearField.setText(String.valueOf(currentSong.getReleasdDate()));
+        streamsField.setText(currentSong.getTotalNumberOfStreamsOnSpotify());
     }
 
     public static void main(String[] args) {
 
-                new SongViewer(new SongManager());
+        new SongViewer(new SongManager());
 
     }
 }
-
