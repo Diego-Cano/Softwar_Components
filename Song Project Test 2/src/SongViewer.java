@@ -203,6 +203,9 @@ public class SongViewer extends JFrame {
         } else if (currentYearIndex < songManager.getYearCount() - 1) {
             currentYearIndex++;
             currentSongIndex = 0;
+        }else {
+            // If we're already at the last song of the last year, do nothing
+            return;
         }
 
         // Check if the release year has changed
